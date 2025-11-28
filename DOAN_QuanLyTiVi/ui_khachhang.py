@@ -3,27 +3,38 @@ from tkinter import ttk, messagebox
 import database as db
 
 class QuanLyKhachHang(ttk.Frame):
-    def __init__(self, parent):
+    def __init__(self, parent, nav_callbacks=None):
         super().__init__(parent)
         self.pack(fill=tk.BOTH, expand=True)
+        self.nav_callbacks = nav_callbacks
         self.current_action = "idle"
 
-       
+        # --- STYLE TÍM ---
         COLOR_HEADER = "#6A1B9A" 
         COLOR_BG = "#F3E5F5"    
         FONT_TEXT = ("Segoe UI", 11)
         FONT_BTN = ("Segoe UI", 10, "bold")
 
-        
+        # Cấu hình bảng
+        style = ttk.Style()
+        style.configure("Treeview", font=("Segoe UI", 10), rowheight=30)
+        style.configure("Treeview.Heading", font=("Segoe UI", 11, "bold"), foreground="#333")
+
+        # Header
         header = tk.Frame(self, bg=COLOR_HEADER, height=60)
         header.pack(fill=tk.X)
         tk.Label(header, text="💎 QUẢN LÝ KHÁCH HÀNG", font=("Segoe UI", 20, "bold"), bg=COLOR_HEADER, fg="white").pack(side=tk.LEFT, padx=20, pady=15)
 
-      
+
+        if self.nav_callbacks:
+            self.tao_thanh_dieu_huong()
+
+
+        # Body
         body = tk.Frame(self, bg=COLOR_BG)
         body.pack(fill=tk.BOTH, expand=True)
 
-        
+        # Form
         input_frame = tk.LabelFrame(body, text="Thông tin khách hàng", font=("Segoe UI", 12, "bold"), bg=COLOR_BG, fg=COLOR_HEADER)
         input_frame.pack(fill=tk.X, padx=20, pady=10)
 
@@ -45,7 +56,7 @@ class QuanLyKhachHang(ttk.Frame):
 
         input_frame.columnconfigure(1, weight=1); input_frame.columnconfigure(3, weight=1)
 
-      
+        # Nút bấm
         btn_frame = tk.Frame(body, bg=COLOR_BG)
         btn_frame.pack(fill=tk.X, padx=20, pady=5)
 
@@ -62,7 +73,7 @@ class QuanLyKhachHang(ttk.Frame):
         
         self.reset_buttons()
 
-        
+        # Bảng
         tree_frame = tk.Frame(body, bg=COLOR_BG)
         tree_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=10)
         
@@ -81,6 +92,25 @@ class QuanLyKhachHang(ttk.Frame):
         
         self.tree.bind('<<TreeviewSelect>>', self.on_item_select)
         self.load_data()
+
+    def tao_thanh_dieu_huong(self):
+        nav_frame = tk.Frame(self, bg="#E0E0E0", height=50)
+        nav_frame.pack(fill=tk.X)
+        tk.Label(nav_frame, text="Chuyển nhanh: ", bg="#E0E0E0", font=("Segoe UI", 11)).pack(side=tk.LEFT, padx=10)
+
+        def btn_nav(text, func_key, color):
+            cmd = lambda: [self.master.destroy(), self.nav_callbacks[func_key]()]
+            tk.Button(nav_frame, text=text, command=cmd, bg=color, fg="white", 
+                      font=("Segoe UI", 10, "bold"), bd=0, padx=15, pady=5, cursor="hand2").pack(side=tk.LEFT, padx=3, pady=5)
+
+        btn_nav("SẢN PHẨM", 'tivi', "#1A237E")
+        btn_nav("NHÂN VIÊN", 'nv', "#EF6C00")
+        btn_nav("NHÀ CUNG CẤP", 'ncc', "#00695C")
+        btn_nav("HÓA ĐƠN", 'hd', "#2E7D32")
+        
+        tk.Button(nav_frame, text="🏠 VỀ TRANG CHỦ", 
+                  command=lambda: [self.master.destroy(), self.nav_callbacks['menu']()],
+                  bg="#333", fg="white", font=("Segoe UI", 10, "bold"), bd=0, padx=15, pady=5).pack(side=tk.RIGHT, padx=10)
 
     def load_data(self):
         for row in self.tree.get_children(): self.tree.delete(row)
@@ -126,5 +156,3 @@ class QuanLyKhachHang(ttk.Frame):
         if messagebox.askyesno("Xóa", f"Xóa khách {item[1]}?"):
             if db.xoa_khach_hang(item[0]): self.load_data(); self.clear_form(); self.reset_buttons()
             else: messagebox.showerror("Lỗi", "Không thể xóa")
-
-    
