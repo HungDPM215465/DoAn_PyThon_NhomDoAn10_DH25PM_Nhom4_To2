@@ -460,9 +460,6 @@ def open_hoadon_window():
     var_dienthoai = tk.StringVar()
 
     new_uuid = str(uuid.uuid4()) 
-    
-    # Bạn có thể bỏ tiền tố "HDB" nếu muốn dùng UUID trần
-    # hoặc ghép lại cho dễ nhận biết (MaHD mới khoảng 36-39 ký tự)
     var_ma_hd.set(f"HDB{new_uuid}")
 
     tk.Label(frame_chung, text="Mã hóa đơn:").grid(row=0, column=0, sticky="w", pady=5)
